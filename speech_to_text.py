@@ -3,7 +3,7 @@ import sounddevice as sd
 import numpy as np
 
 class SpeechRecognizer:
-    def __init__(self, model_name="small"):
+    def __init__(self, model_name="base"):
         self.model = whisper.load_model(model_name)
 
     def listen(self, duration=5, fs=16000):
