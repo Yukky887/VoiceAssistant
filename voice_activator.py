@@ -1,6 +1,7 @@
 import speech_recognition as sr
 import threading
 import time
+import levenshtein
 
 class VoiceActivator:
     def __init__(self, activation_phrase="джарвис", deactivation_phrase="спать"):
@@ -17,6 +18,8 @@ class VoiceActivator:
             self.recognizer.adjust_for_ambient_noise(source)
         print("Микрофон откалиброван!")
 
+    LEV_THRESHOLD = 5
+
     def listen_for_activation(self):
         self.listening = True
         print(f"Ожидаю кодовое слово '{self.activation_phrase}'...")
@@ -29,13 +32,15 @@ class VoiceActivator:
 
                 text = self.recognizer.recognize_google(audio, language="ru-RU").lower()
                 print(f"Услышано: {text}")
+                distance_up = levenshtein.distance(self.activation_phrase, text)
+                distance_down = levenshtein.distance(self.deactivation_phrase, text)
+                print(distance_up, distance_down)
 
-                if self.activation_phrase in text and not self.is_active:
+                if distance_up <= LEV_THRESHOLD and not self.is_active:
                     self.is_active = True
                     print(f"АКТИВИРОВАН! Кодовое слово '{self.activation_phrase}' распознано")
                     return True
-
-                elif self.deactivation_phrase in text and self.is_active:
+                elif distance_down <= LEV_THRESHOLD and self.is_active:
                     self.is_active = False
                     print(f"ДЕАКТИВИРОВАН! Команда '{self.deactivation_phrase}' распознана")
 
